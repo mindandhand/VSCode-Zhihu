@@ -2,6 +2,7 @@
 import { SelfProfileAPI, SignUpRedirectPage } from "../const/URL";
 import { IProfile } from "../model/target/target";
 import { sendRequest } from "./http.service";
+import { Output } from "../global/logger";
 
 
 export class AccountService {
@@ -21,18 +22,20 @@ export class AccountService {
 		let checkIfSignedIn;
 		try {
 			checkIfSignedIn = await sendRequest({
-				uri: SignUpRedirectPage,
-				followRedirect: false,
-				followAllRedirects: false,
+				uri: SelfProfileAPI,
 				resolveWithFullResponse: true,
 				gzip: true,
-				simple: false
+				json: true,
+				simple: false,
+				timeout: 15000
 			});
 		} catch (err) {
 			console.error('Http error', err);
+			Output(`登录状态验证异常: ${String(err)}`);
 			return false;
 		}
-		return Promise.resolve(checkIfSignedIn ? checkIfSignedIn.statusCode == '302' : false);
+		Output(`登录状态验证返回: ${checkIfSignedIn ? checkIfSignedIn.statusCode : 'null'}`);
+		return Promise.resolve(checkIfSignedIn ? checkIfSignedIn.statusCode == 200 : false);
 	}
 
 }

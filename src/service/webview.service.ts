@@ -58,7 +58,7 @@ export class WebviewService {
 			const includeContent = "data[*].is_normal,content,voteup_count;";
 			let offset = 0;
 			let questionAPI = `${QuestionAPI}/${object.id}?include=detail%2cexcerpt`;
-			let answerAPI = `${QuestionAPI}/${object.id}/answers?include=${includeContent}?offset=${offset}`;
+			let answerAPI = `${QuestionAPI}/${object.id}/answers?include=${includeContent}&offset=${offset}`;
 			let question: IQuestionTarget = await sendRequest({
 				uri: questionAPI,
 				json: true,
@@ -79,7 +79,7 @@ export class WebviewService {
 					"questions-answers.pug"
 				),
 				pugObjects: {
-					answers: body.data.map(t => {  
+					answers: (body && body.data ? body.data : []).map(t => {  
 						t.content = this.actualSrcNormalize(t.content);
 						return t;
 					}),
@@ -108,18 +108,24 @@ export class WebviewService {
 					answers: [
 						body
 					],
-					title: object.question.name,
+					title: object.question ? object.question.title : "知乎回答",
 					useVSTheme
 				}
 			})
 			this.registerEvent(panel, { type: MediaTypes.answer, id: object.id }, `${AnswerURL}/${body.id}`)
 		} else if (object.type == MediaTypes.article) {
+			const articleAPI = object.url && object.url.includes("/api/")
+				? object.url
+				: `${ArticleAPI}/${object.id}`;
 			let article: IArticle = await sendRequest({
-				uri: `${object.url}?include=voteup_count`,
+				uri: `${articleAPI}?include=voteup_count`,
 				json: true,
-				gzip: true,
-				headers: null
+				gzip: true
 			});
+			if (!article || !article.content) {
+				vscode.window.showWarningMessage("文章打开失败，未获取到文章内容。");
+				return;
+			}
 			let useVSTheme = vscode.workspace.getConfiguration('zhihu').get(SettingEnum.useVSTheme);
 			article.content = this.actualSrcNormalize(article.content);
 			let panel = this.renderHtml({
@@ -179,7 +185,7 @@ export class WebviewService {
 		}, undefined, getSubscriptions())
 	}
 
-	private actualSrcNormalize(html: string): string {
-		return html.replace(/<\/?noscript>/g, '');
+	private actualSrcNormalize(html?: string): string {
+		return (html || '').replace(/<\/?noscript>/g, '');
 	}
 }

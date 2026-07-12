@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FeedStoryAPI } from '../const/URL';
+import { ArticleDraftsAPI, FeedStoryAPI, MemberArticlesAPI, ZhuanlanAPI } from '../const/URL';
 import { IArticleTarget, IQuestionAnswerTarget, ITarget, IFeedTarget } from '../model/target/target';
 import { AccountService } from '../service/account.service';
 import { HttpService, sendRequest } from '../service/http.service';
@@ -17,6 +17,8 @@ export interface FeedType {
 
 export const FEED_TYPES: FeedType[] = [
 	{ type: 'feed', ch: '推荐' },
+	{ type: 'articles', ch: '已发表文章' },
+	{ type: 'drafts', ch: '草稿箱' },
 	{ type: 'event', ch: '安排' }
 ];
 
@@ -71,13 +73,61 @@ export class FeedTreeViewProvider implements vscode.TreeDataProvider<vscode.Tree
 							return new FeedTreeItem(feed.target.question.title, feed.target.type, vscode.TreeItemCollapsibleState.None, {
 								command: 'zhihu.openWebView',
 								title: 'openWebView',
-								arguments: [feed.target.question]
+								arguments: [feed.target]
 							}, feed.target);
 						} else {
 							return new FeedTreeItem('', '', vscode.TreeItemCollapsibleState.None);
 						}
 					});
 					resolve(deps);
+				})
+			} else if (element.type == 'articles') {
+				return new Promise(async (resolve, reject) => {
+					if (! await this.accountService.isAuthenticated()) {
+						return resolve([new FeedTreeItem('(请先登录，查看已发表文章)', '', vscode.TreeItemCollapsibleState.None)]);
+					}
+					await this.profileService.fetchProfile();
+					if (!this.profileService.profile || !this.profileService.profile.url_token) {
+						return resolve([new FeedTreeItem('(未获取到账号信息)', '', vscode.TreeItemCollapsibleState.None)]);
+					}
+					const resp = await sendRequest({
+						uri: MemberArticlesAPI(this.profileService.profile.url_token, element.page || 0),
+						json: true,
+						gzip: true
+					});
+					const articles = resp && resp.data ? resp.data : [];
+					if (articles.length == 0) {
+						return resolve([new FeedTreeItem('(暂无已发表文章)', '', vscode.TreeItemCollapsibleState.None)]);
+					}
+					resolve(articles.map(article => new FeedTreeItem(article.title || article.excerpt_title || '(未命名文章)', MediaTypes.article, vscode.TreeItemCollapsibleState.None, {
+						command: 'zhihu.openWebView',
+						title: 'openWebView',
+						arguments: [article]
+					}, article)));
+				})
+			} else if (element.type == 'drafts') {
+				return new Promise(async (resolve, reject) => {
+					if (! await this.accountService.isAuthenticated()) {
+						return resolve([new FeedTreeItem('(请先登录，查看草稿箱)', '', vscode.TreeItemCollapsibleState.None)]);
+					}
+					const resp = await sendRequest({
+						uri: ArticleDraftsAPI(element.page || 0),
+						json: true,
+						gzip: true
+					});
+					const drafts = resp && resp.data ? resp.data : [];
+					if (drafts.length == 0) {
+						return resolve([new FeedTreeItem('(暂无草稿)', '', vscode.TreeItemCollapsibleState.None)]);
+					}
+					resolve(drafts.map(draft => {
+						draft.type = MediaTypes.article;
+						draft.url = `${ZhuanlanAPI}/${draft.id}/draft`;
+						return new FeedTreeItem(draft.title || draft.excerpt_title || '(未命名草稿)', MediaTypes.article, vscode.TreeItemCollapsibleState.None, {
+							command: 'zhihu.openWebView',
+							title: 'openWebView',
+							arguments: [draft]
+						}, draft);
+					}));
 				})
 			} else if (element.type == 'event') {
 				let events = this.eventService.getEvents();

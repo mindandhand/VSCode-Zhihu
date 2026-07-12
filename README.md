@@ -1,6 +1,3 @@
-[![](https://vsmarketplacebadge.apphb.com/version-short/niudai.vscode-zhihu.svg)](https://marketplace.visualstudio.com/items?itemName=niudai.vscode-zhihu)
-[![](https://vsmarketplacebadge.apphb.com/downloads-short/niudai.vscode-zhihu.svg)](https://marketplace.visualstudio.com/items?itemName=niudai.vscode-zhihu)
-[![](https://vsmarketplacebadge.apphb.com/rating-short/niudai.vscode-zhihu.svg)](https://marketplace.visualstudio.com/items?itemName=niudai.vscode-zhihu)
 
 
 <p align="center">
@@ -8,18 +5,57 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/niudai/VSCode-Zhihu">打一颗 ⭐，世界更亮。</a>
+<a href="https://github.com/mindandhand/VSCode-Zhihu">如果这个维护版对你有帮助，欢迎给当前仓库一个 ⭐。</a>
 </p>
 
 
 # 👽 Zhihu On VSCode
 
-基于 VSCode 的知乎客户端提供包括阅读，搜索，创作，发布等一站式服务，内容加载速度比 Web 端更快，创新的 Markdown-Latex 混合语法让内容创作者更方便地插入代码块，数学公式，并一键发布至知乎平台。项目由 [牛岱](https://www.zhihu.com/people/niu-dai-68-44) 独立设计开发，喜欢的话请献出你的 [⭐](https://github.com/niudai/VSCode-Zhihu '给一个Star')。
+基于 VSCode 的知乎客户端提供包括阅读，搜索，创作，发布等一站式服务，内容加载速度比 Web 端更快，创新的 Markdown-Latex 混合语法让内容创作者更方便地插入代码块，数学公式，并一键发布至知乎平台。
+
+原项目由 [牛岱](https://www.zhihu.com/people/niu-dai-68-44) 独立设计开发，原仓库为 [niudai/VSCode-Zhihu](https://github.com/niudai/VSCode-Zhihu)。当前仓库是继续维护版本，用于适配新的知乎登录状态和 VS Code 扩展运行环境。
+
+## 🛠 维护说明
+
+本仓库是在原项目 [niudai/VSCode-Zhihu](https://github.com/niudai/VSCode-Zhihu) 基础上的继续维护版本，保留原有阅读、搜索、创作、发布等能力，并针对知乎接口和 VS Code 扩展运行环境变化做了兼容修复。
+
+当前维护版主要更新：
+
+- 修复扩展激活时报 `command 'zhihu.login' not found` 的问题。
+- 登录方式调整为浏览器 Cookie 登录：插件打开独立浏览器窗口，用户在浏览器中登录知乎后，插件自动获取当前会话 Cookie。
+- 移除知乎微信登录入口；扩展内置密码/验证码登录链路暂不稳定，不再作为推荐入口。
+- 修复登录 Cookie 写入后 VS Code 内仍无法识别登录状态的问题。
+- 修复推荐列表点击内容时报 `Cannot read properties of undefined (reading 'replace')` 的问题。
+- 修复推荐流中回答类内容无法正常打开的问题。
+- 新增“已发表文章”和“草稿箱”列表入口。
+- 修复 Cookie 存储清空后文件 JSON 无效的问题。
+- 修复打包后运行时缺少 `canvas`、`uglify-js` 相关模块导致扩展无法激活的问题。
+- 增加部分登录和 Cookie 处理测试。
+
+## 📦 安装
+
+如果已发布到 VS Code Marketplace，可在扩展市场搜索：
+
+```
+Zhihu On VSCode Maintained
+```
+
+或通过命令行安装：
+
+```bash
+code --install-extension mindandhand.vscode-zhihu-maintained
+```
+
+也可以从 GitHub Release 下载 `.vsix` 后本地安装：
+
+```bash
+code --install-extension vscode-zhihu-maintained-0.6.6.vsix
+```
 
 ## ⚡ Features
 
 - 登录
-  - [二维码/账密登录](#🔑-登录 )
+  - [浏览器 Cookie 登录](#🔑-登录 )
 - 创作
   - [内容创作](#🖍-内容创作)
   - [内容发布](#📩-内容发布)
@@ -27,6 +63,7 @@
   - [定时发布](#🕐-定时发布)
 - 浏览
   - [个性推荐](#🎭-个性推荐)
+  - [已发表文章与草稿箱](#🗂-已发表文章与草稿箱)
   - [实时热榜](#hot-story)
   - [搜索全站](#🔎-搜索 )
   - [收藏夹](#🎫-收藏夹)
@@ -47,18 +84,14 @@
 
 进入主页面，左侧最上方栏为个人中心，点击登录图标，或使用 `Ctrl + Shift + P` 打开命令面板，搜索并执行 `Zhihu: Login` 命令。
 
-选择登录方式：
+当前维护版推荐使用浏览器 Cookie 登录。插件会打开一个独立浏览器窗口，你只需要在该窗口中完成知乎登录，插件会自动读取该浏览器会话中的 Cookie 并写入 VS Code 扩展。
 
-### 二维码
+建议在浏览器窗口里使用账号密码登录知乎。知乎当前的验证码、短信、第三方登录链路经常触发风控，扩展内置密码/验证码登录暂不稳定，因此不再作为主要入口。
 
-选择二维码登陆后，会弹出二维码页面，打开知乎 APP，扫码后点击确认登录：
+如果自动获取失败，插件会提示你从 `www.zhihu.com` 的请求头中复制完整 `Cookie`，粘贴后继续验证登录状态。至少需要包含 `z_c0`，通常还会包含 `_xsrf`、`d_c0` 等字段。
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-28-08.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-### 账号密码
-
-视情况，插件会加载并显示验证码，提示你输入验证码，输入后，再依次根据提示输入手机号和密码即可。
 
 登录成功后会有问候语，推荐栏会自动刷新出你的个性签名和头像：
 
@@ -85,6 +118,17 @@
 <img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-21-02-30.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
 
 ___
+
+## 🗂 已发表文章与草稿箱
+
+登录成功后，“推荐”视图下会显示“已发表文章”和“草稿箱”两个入口：
+
+- 已发表文章：展示当前账号已经发布的知乎文章，点击后可在 VS Code Webview 中查看。
+- 草稿箱：展示当前账号文章草稿，点击后可预览草稿内容。
+
+如果列表为空，请先确认已经登录，并点击刷新按钮重新加载。
+
+---
 
 ## 💥 热榜
 

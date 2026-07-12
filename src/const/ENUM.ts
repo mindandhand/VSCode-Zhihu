@@ -41,10 +41,10 @@ export enum LoginEnum {
 }
 
 export const LoginTypes = [
-	{ value: LoginEnum.qrcode, ch: '二维码'},
+	{ value: LoginEnum.qrcode, ch: '浏览器 Cookie', description: '推荐：在打开的浏览器里用账号密码登录，插件会自动获取 Cookie' },
 	// { value: LoginEnum.sms, ch: '短信验证码' },
-	{ value: LoginEnum.weixin, ch: '微信'},
-	// { value: LoginEnum.password, ch: '密码' },
+	// 内置密码/验证码登录链路容易被知乎风控拦截，保留实现但不再暴露入口。
+	// { value: LoginEnum.password, ch: '账号密码' },
 ];
 
 export const JianshuLoginTypes = [
@@ -53,7 +53,8 @@ export const JianshuLoginTypes = [
 
 export enum SettingEnum {
 	useVSTheme = 'useVSTheme',
-	isTitleImageFullScreen = 'isTitleImageFullScreen'
+	isTitleImageFullScreen = 'isTitleImageFullScreen',
+	useWaterMark = 'useWaterMark'
 }
 
 export enum WebviewEvents {

@@ -18,7 +18,7 @@ import {
 import { PostAnswer } from "../model/publish/answer.model";
 import { IColumn } from "../model/publish/column.model";
 import { IProfile, ITarget, ITopicTarget } from "../model/target/target";
-import { beautifyDate, removeHtmlTag } from "../util/md-html-utils";
+import { beautifyDate, removeHtmlTag, removeSyncWatermark } from "../util/md-html-utils";
 import { CollectionService, ICollectionItem } from "./collection.service";
 import { EventService } from "./event.service";
 import { HttpService, sendRequest } from "./http.service";
@@ -108,9 +108,14 @@ export class PublishService {
         const timeObject: TimeObject = { hour: 0, date: new Date(), minute: 0 };
         // get rid of shebang line
         if (url) text = text.slice(text.indexOf("\n") + 1);
-        text =
-            text +
-            "\n\n>本文使用 [Zhihu On VSCode](https://zhuanlan.zhihu.com/p/106057556) 创作并发布";
+        const useWaterMark = vscode.workspace
+            .getConfiguration("zhihu")
+            .get(SettingEnum.useWaterMark);
+        if (useWaterMark) {
+            text =
+                text +
+                "\n\n>本文使用 [Zhihu On VSCode](https://zhuanlan.zhihu.com/p/106057556) 创作并发布";
+        }
 
         const isEnable = vscode.workspace
             .getConfiguration("zhihu")
@@ -135,7 +140,10 @@ export class PublishService {
         );
         await pipePromise;
 
-        let html = this.zhihuMdParser.renderer.render(tokens, {}, {});
+        let html = removeSyncWatermark(
+            this.zhihuMdParser.renderer.render(tokens, {}, {}),
+            !useWaterMark
+        );
         const openIndex = tokens.findIndex(
             (t) => t.type == "heading_open" && t.tag == "h1"
         );
@@ -367,7 +375,12 @@ export class PublishService {
         html: string
     ) {
         tokens = tokens.filter(this._removeTitleAndBg(openIndex, bgIndex));
-        html = this.zhihuMdParser.renderer.render(tokens, {}, {});
+        html = removeSyncWatermark(
+            this.zhihuMdParser.renderer.render(tokens, {}, {}),
+            !vscode.workspace
+                .getConfiguration("zhihu")
+                .get(SettingEnum.useWaterMark)
+        );
         return { tokens, html };
     }
 

@@ -38,6 +38,15 @@ function removeSpace(text: string) {
 	return text.replace(SpaceReg, ' ');
 }
 
+function removeSyncWatermark(html: string, removeFooter: boolean = true) {
+	let result = html
+		.replace(/\sdata-(?:default-)?watermark(?:-src)?="[^"]*"/g, '')
+	if (removeFooter) {
+		result = result.replace(/<blockquote><p>本文使用\s*<a href="https:\/\/zhuanlan\.zhihu\.com\/p\/106057556">Zhihu On VSCode<\/a>\s*创作并发布<\/p><\/blockquote>\s*/g, '');
+	}
+	return result;
+}
+
 /**
  * get human-readable time formate, like `5:24 pm`
  * @param hour the hour to be converted
@@ -48,4 +57,4 @@ function beautifyDate(date: Date) {
 	return `${isAm ? hour : hour - 12}:${minute < 10 ? '0' + minute : minute} ${isAm ? 'am' : 'pm'}`
 }
 
-export { escapeHtml, unescapeMd, removeHtmlTag, removeSpace, beautifyDate }
+export { escapeHtml, unescapeMd, removeHtmlTag, removeSpace, removeSyncWatermark, beautifyDate }

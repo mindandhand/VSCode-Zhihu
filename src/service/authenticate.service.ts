@@ -11,11 +11,12 @@ import { ILogin, ISmsData } from "../model/login.model";
 import { FeedTreeViewProvider } from "../treeview/feed-treeview-provider";
 import { LoginEnum, LoginTypes, SettingEnum, JianshuLoginTypes } from "../const/ENUM";
 import { AccountService } from "./account.service";
-import { HttpService, clearCookie, sendRequest } from "./http.service";
+import { HttpService, applyCookieHeader, clearCookie, sendRequest } from "./http.service";
 import { ProfileService } from "./profile.service";
 import { WebviewService } from "./webview.service";
 import { getExtensionPath } from "../global/globa-var";
 import { Output } from "../global/logger";
+import { getCookieHeaderFromLoginBrowser } from "./browser-cookie-login.service";
 
 var formurlencoded = require('form-urlencoded').default;
 
@@ -43,10 +44,12 @@ export class AuthenticateService {
 			return;
 		}
 		clearCookie()
-		const selectedLoginType: LoginEnum = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: LoginEnum }>(
-			LoginTypes.map(type => ({ value: type.value, label: type.ch, description: '' })),
-			{ placeHolder: "选择登录方式: " }
-		).then(item => item.value);
+		const selected = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: LoginEnum }>(
+			LoginTypes.map(type => ({ value: type.value, label: type.ch, description: type.description })),
+			{ placeHolder: "推荐在浏览器窗口里用账号密码登录；扩展内置密码/验证码登录暂不稳定" }
+		);
+		if (!selected) return;
+		const selectedLoginType: LoginEnum = selected.value;
 
 		if (selectedLoginType == LoginEnum.password) {
 			this.passwordLogin();
@@ -54,8 +57,6 @@ export class AuthenticateService {
 			this.smsLogin();
 		} else if (selectedLoginType == LoginEnum.qrcode) {
 			this.qrcodeLogin();
-		} else if (selectedLoginType == LoginEnum.weixin) {
-			this.weixinLogin();
 		}
 	}
 
@@ -140,8 +141,8 @@ export class AuthenticateService {
 
 		const phoneNumber: string | undefined = await vscode.window.showInputBox({
 			ignoreFocusOut: true,
-			prompt: "输入手机号或邮箱",
-			placeHolder: "",
+			prompt: "输入邮箱、用户名或手机号。建议优先使用邮箱/账号密码，手机号登录可能触发知乎风控。",
+			placeHolder: "邮箱/用户名/手机号",
 		});
 		if (!phoneNumber) return;
 
@@ -236,70 +237,37 @@ export class AuthenticateService {
 	}
 
 	public async qrcodeLogin() {
-		await sendRequest({
-			uri: UDIDAPI,
-			method: 'post'
-		});
-		let resp = await sendRequest({
-			uri: QRCodeAPI,
-			method: 'post',
-			json: true,
-			gzip: true,
-			header: QRCodeOptionHeader
-		});
-		let qrcode = await sendRequest({
-			uri: `${QRCodeAPI}/${resp.token}/image`,
-			encoding: null
-		});
-		fs.writeFileSync(path.join(getExtensionPath(), 'qrcode.png'), qrcode);
-		const panel = vscode.window.createWebviewPanel("zhihu", "验证码", { viewColumn: vscode.ViewColumn.One, preserveFocus: true });
-		const imgSrc = panel.webview.asWebviewUri(vscode.Uri.file(
-			path.join(getExtensionPath(), './qrcode.png')
-		))
-		this.webviewService.renderHtml(
-			{
-				title: '二维码',
-				showOptions: {
-					viewColumn: vscode.ViewColumn.One,
-					preserveFocus: true
-				},
-				pugTemplatePath: path.join(
-					getExtensionPath(),
-					TemplatePath,
-					'qrcode.pug'
-				),
-				pugObjects: {
-					title: '打开知乎 APP 扫一扫',
-					qrcodeSrc: imgSrc.toString(),
-					useVSTheme: vscode.workspace.getConfiguration('zhihu').get(SettingEnum.useVSTheme)
-				}
-			},
-			panel
-		);
-		let intervalId = setInterval(() => {
-			sendRequest({
-				uri: `${QRCodeAPI}/${resp.token}/scan_info`,
-				json: true,
-				gzip: true
-			}).then(
-				r => {
-					if (r.status == 1) {
-						vscode.window.showInformationMessage('请在手机上确认登录！');
-					} else if (r.user_id) {
-						clearInterval(intervalId);
-						panel.dispose();
-						this.profileService.fetchProfile().then(() => {
-							vscode.window.showInformationMessage(`你好，${this.profileService.name}`);
-							this.feedTreeViewProvider.refresh();
-						})
-					}
-				}
-			);
-		}, 1000)
-		panel.onDidDispose(() => {
-			console.log('Window is disposed')
-			clearInterval(intervalId)
-		})
+		let cookieHeader = await getCookieHeaderFromLoginBrowser();
+		if (!cookieHeader) {
+			cookieHeader = await vscode.window.showInputBox({
+				ignoreFocusOut: true,
+				prompt: "自动获取失败。请在浏览器用账号密码登录知乎后，复制 www.zhihu.com 请求头里的 Cookie 并粘贴到这里",
+				placeHolder: "z_c0=...; _xsrf=...; d_c0=...",
+			});
+		}
+		if (!cookieHeader) return;
+		if (cookieHeader.indexOf("z_c0=") < 0) {
+			vscode.window.showWarningMessage("Cookie 中没有 z_c0，请确认已在浏览器登录知乎并复制完整 Cookie。");
+			return;
+		}
+
+		applyCookieHeader(cookieHeader);
+		const cookieNames = cookieHeader.includes("\n")
+			? cookieHeader.split(/\r?\n/).map(c => c.trim().split("=")[0])
+			: cookieHeader.split(";").map(c => c.trim().split("=")[0]);
+		Output(`自动登录 Cookie 已写入，数量: ${cookieNames.length}, 包含: ${cookieNames.join(", ")}`);
+		const isAuthenticated = await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: "正在验证知乎登录状态",
+			cancellable: false
+		}, async () => this.accountService.isAuthenticated());
+		if (isAuthenticated) {
+			await this.profileService.fetchProfile();
+			vscode.window.showInformationMessage(`你好，${this.profileService.name}`);
+			this.feedTreeViewProvider.refresh();
+		} else {
+			vscode.window.showWarningMessage("登录验证失败，请重新复制知乎网页请求头里的完整 Cookie。");
+		}
 	}
 
 	public async weixinLogin() {

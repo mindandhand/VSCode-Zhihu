@@ -94,6 +94,14 @@ export function ColumnAPI(urltoken: string) {
 	return `https://www.zhihu.com/api/v4/members/${urltoken}/column-contributions?include=data%5B*%5D.column.intro%2Cfollowers%2Carticles_count&offset=0&limit=20`
 }
 
+export function MemberArticlesAPI(urltoken: string, offset = 0, limit = 20) {
+	return `https://www.zhihu.com/api/v4/members/${urltoken}/articles?include=data%5B*%5D.comment_count%2Cvoteup_count%2Cexcerpt%2Cexcerpt_title&offset=${offset}&limit=${limit}&sort_by=created`;
+}
+
+export function ArticleDraftsAPI(offset = 0, limit = 20) {
+	return `${ZhuanlanAPI}/drafts?offset=${offset}&limit=${limit}`;
+}
+
 export function TopicsAPI(searchToken: string) {
 	return `https://zhuanlan.zhihu.com/api/autocomplete/topics?token=${searchToken}&max_matches=5&use_similar=0&topic_filter=1`
 }

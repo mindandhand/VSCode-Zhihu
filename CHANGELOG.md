@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.6] - 2026-07-12
+
+### Added
+
+- 新增浏览器 Cookie 登录流程，插件打开独立浏览器窗口并自动读取知乎登录 Cookie。
+- 新增“已发表文章”和“草稿箱”入口。
+- 新增维护版 README 说明。
+
+### Changed
+
+- 新插件发布名调整为 `vscode-zhihu-maintained`，用于和原 Marketplace 扩展区分。
+- 知乎登录入口调整为推荐浏览器 Cookie 登录。
+- 移除知乎微信登录入口；扩展内置密码/验证码登录链路暂不作为推荐入口。
+
+### Fixed
+
+- 修复扩展激活时报 `command 'zhihu.login' not found` 的问题。
+- 修复登录 Cookie 已获取但 VS Code 内验证仍为 401 的问题。
+- 修复推荐列表点击内容时报 `Cannot read properties of undefined (reading 'replace')` 的问题。
+- 修复推荐流中回答类内容无法正常打开的问题。
+- 修复 Cookie 存储清空后 JSON 无效的问题。
+- 修复生产打包后运行时缺少 `canvas`、`uglify-js` 相关模块导致扩展无法激活的问题。
+
 ## [0.3.0]
 
 ### 文章/答案发布后自动生成头部链接
@@ -164,5 +187,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Removed
-
-

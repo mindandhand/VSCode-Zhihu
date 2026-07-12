@@ -1,9 +1,9 @@
 {
-	"name": "vscode-zhihu",
-	"displayName": "Zhihu On VSCode",
-	"description": "Zhihu VSCode Extension",
-	"version": "0.4.0",
-	"publisher": "niudai",
+	"name": "vscode-zhihu-maintained",
+	"displayName": "Zhihu On VSCode Maintained",
+	"description": "A maintained VS Code Zhihu client with browser Cookie login, reading, search, Markdown publishing, drafts and article lists.",
+	"version": "0.6.6",
+	"publisher": "mindandhand",
 	"enableProposedApi": false,
 	"engines": {
 		"vscode": "^1.41.0"
@@ -33,13 +33,20 @@
 	],
 	"keywords": [
 		"zhihu",
+		"知乎",
 		"feed",
-		"entertainment"
+		"markdown",
+		"publish",
+		"article"
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/niudai/VSCode-Zhihu"
+		"url": "https://github.com/mindandhand/VSCode-Zhihu"
 	},
+	"bugs": {
+		"url": "https://github.com/mindandhand/VSCode-Zhihu/issues"
+	},
+	"homepage": "https://github.com/mindandhand/VSCode-Zhihu#readme",
 	"icon": "res/media/extension.png",
 	"main": "./dist/extension.js",
 	"contributes": {

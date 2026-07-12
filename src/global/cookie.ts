@@ -13,7 +13,11 @@ export function getCookieStore() {
 }
 
 export function clearCookieStore() {
-    writeFileSync(path.join(getExtensionPath(), './cookie.json'), '');
+    writeFileSync(path.join(getExtensionPath(), './cookie.json'), '{}');
+}
+
+export function persistCookieStore() {
+    writeFileSync(path.join(getExtensionPath(), './cookie.json'), JSON.stringify(store ? (store as any).idx : {}));
 }
 
 export function getCookieJar() {
@@ -23,7 +27,13 @@ export function getCookieJar() {
 
 function loadCookie() {
     if (!store) {
-        store = new FileCookieStore(path.join(getExtensionPath(), './cookie.json'));    
+        const cookiePath = path.join(getExtensionPath(), './cookie.json');
+        try {
+            store = new FileCookieStore(cookiePath);
+        } catch (error) {
+            writeFileSync(cookiePath, '{}');
+            store = new FileCookieStore(cookiePath);
+        }
     }
     if (!cookieJar) {
         cookieJar = new CookieJar(store);

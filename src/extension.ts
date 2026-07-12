@@ -29,6 +29,7 @@ import { ZhihuCompletionProvider, AtPeople } from "./lang/completion-provider";
 import { mermaiSupport } from "./util/mermai-support";
 
 export async function activate(context: vscode.ExtensionContext) {
+	try {
 	Output('Extension Activated')
 	if(!fs.existsSync(path.join(context.extensionPath, './cookie.json'))) {
 		fs.createWriteStream(path.join(context.extensionPath, './cookie.json')).end()
@@ -46,7 +47,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	const defualtMdParser = new MarkdownIt();
 	const accountService = new AccountService();
 	const profileService = new ProfileService(accountService);
-	await profileService.fetchProfile();
 	const collectionService = new CollectionService();
 	const hotStoryTreeViewProvider = new HotStoryTreeViewProvider();
 	const collectionTreeViewProvider = new CollectionTreeviewProvider(profileService, collectionService)
@@ -58,7 +58,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	const pasteService = new PasteService();
 	const pipeService = new PipeService(pasteService);
 	const publishService = new PublishService(zhihuMdParser, defualtMdParser, webviewService, collectionService, eventService, profileService, pasteService, pipeService);
-
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("zhihu.openWebView", async (object) => {
@@ -126,6 +125,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerCompletionItemProvider('markdown', new ZhihuCompletionProvider
 	, '@'));
 
+	profileService.fetchProfile().catch((error) => {
+		Output(error);
+	});
+
 	vscode.commands.registerCommand(
 		"zhihu.deleteCollectionItem",
 		(node: CollectionItem) => {
@@ -163,4 +166,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			return mermaiSupport(md)
         }
     }
+	} catch(e) {
+		vscode.window.showErrorMessage('Zhihu 插件激活失败: ' + String(e));
+		throw e;
+	}
 }
