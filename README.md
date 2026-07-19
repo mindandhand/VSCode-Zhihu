@@ -1,394 +1,167 @@
-
-
 <p align="center">
-  <img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/vscode-zhihu.png" alt="vscode-zhihu logo" width="200px" /></a>
+  <img src="./res/media/extension.png" alt="Zhihu On VSCode" width="160" />
 </p>
 
-<p align="center">
-<a href="https://github.com/mindandhand/VSCode-Zhihu">如果这个维护版对你有帮助，欢迎给当前仓库一个 ⭐。</a>
-</p>
+# Zhihu On VSCode
 
+在 VS Code 中阅读、搜索和创作知乎内容的扩展。支持 Markdown、LaTeX、表格、Mermaid 和图片上传，并可将文章或回答直接发布到知乎。
 
-# 👽 Zhihu On VSCode
+本仓库是 [niudai/VSCode-Zhihu](https://github.com/niudai/VSCode-Zhihu) 的社区维护版本，主要适配当前的知乎登录状态和 VS Code 扩展运行环境。
 
-基于 VSCode 的知乎客户端提供包括阅读，搜索，创作，发布等一站式服务，内容加载速度比 Web 端更快，创新的 Markdown-Latex 混合语法让内容创作者更方便地插入代码块，数学公式，并一键发布至知乎平台。
+## 维护状态
 
-原项目由 [牛岱](https://www.zhihu.com/people/niu-dai-68-44) 独立设计开发，原仓库为 [niudai/VSCode-Zhihu](https://github.com/niudai/VSCode-Zhihu)。当前仓库是继续维护版本，用于适配新的知乎登录状态和 VS Code 扩展运行环境。
+- 当前版本推荐使用浏览器 Cookie 登录。
+- 知乎接口并非公开稳定 API，部分能力可能因网站调整暂时失效。
+- 版本变化记录在 [CHANGELOG.md](./CHANGELOG.md)；遇到问题请提交 [Issue](https://github.com/mindandhand/VSCode-Zhihu/issues)。
 
-## 🛠 维护说明
+## 核心功能
 
-本仓库是在原项目 [niudai/VSCode-Zhihu](https://github.com/niudai/VSCode-Zhihu) 基础上的继续维护版本，保留原有阅读、搜索、创作、发布等能力，并针对知乎接口和 VS Code 扩展运行环境变化做了兼容修复。
+- 浏览个性推荐、实时热榜和收藏夹。
+- 搜索知乎内容，查看已发表文章和草稿箱。
+- 使用 Markdown 创作并发布文章或回答。
+- 支持块级与行内 LaTeX、Markdown 表格和 Mermaid 图表。
+- 上传剪贴板图片、本地图片或工作区图片。
+- 识别文档首行的知乎链接，发布新内容或更新已有内容。
 
-当前维护版主要更新：
+## 安装
 
-- 修复扩展激活时报 `command 'zhihu.login' not found` 的问题。
-- 登录方式调整为浏览器 Cookie 登录：插件打开独立浏览器窗口，用户在浏览器中登录知乎后，插件自动获取当前会话 Cookie。
-- 移除知乎微信登录入口；扩展内置密码/验证码登录链路暂不稳定，不再作为推荐入口。
-- 修复登录 Cookie 写入后 VS Code 内仍无法识别登录状态的问题。
-- 修复推荐列表点击内容时报 `Cannot read properties of undefined (reading 'replace')` 的问题。
-- 修复推荐流中回答类内容无法正常打开的问题。
-- 新增“已发表文章”和“草稿箱”列表入口。
-- 修复 Cookie 存储清空后文件 JSON 无效的问题。
-- 修复打包后运行时缺少 `canvas`、`uglify-js` 相关模块导致扩展无法激活的问题。
-- 增加部分登录和 Cookie 处理测试。
-
-## 📦 安装
-
-如果已发布到 VS Code Marketplace，可在扩展市场搜索：
-
-```
-Zhihu On VSCode Maintained
-```
-
-或通过命令行安装：
+发布到 VS Code Marketplace 后，可搜索 `Zhihu On VSCode Maintained`，或使用命令行安装：
 
 ```bash
 code --install-extension mindandhand.vscode-zhihu-maintained
 ```
 
-也可以从 GitHub Release 下载 `.vsix` 后本地安装：
+也可以从 [GitHub Releases](https://github.com/mindandhand/VSCode-Zhihu/releases) 下载 `.vsix` 文件后安装：
 
 ```bash
-code --install-extension vscode-zhihu-maintained-0.6.6.vsix
+code --install-extension <下载的文件>.vsix
 ```
 
-## ⚡ Features
+## 快速开始
 
-- 登录
-  - [浏览器 Cookie 登录](#🔑-登录 )
-- 创作
-  - [内容创作](#🖍-内容创作)
-  - [内容发布](#📩-内容发布)
-  - [一键上传图片](#📊-上传图片)
-  - [定时发布](#🕐-定时发布)
-- 浏览
-  - [个性推荐](#🎭-个性推荐)
-  - [已发表文章与草稿箱](#🗂-已发表文章与草稿箱)
-  - [实时热榜](#hot-story)
-  - [搜索全站](#🔎-搜索 )
-  - [收藏夹](#🎫-收藏夹)
+### 1. 登录
 
+打开命令面板（`Ctrl/Cmd + Shift + P`），执行 `Zhihu: Login`。扩展会打开独立浏览器窗口；在该窗口完成知乎登录后，扩展会读取当前会话 Cookie。
 
-## 📃 Reference
+如果自动获取失败，可按扩展提示从 `www.zhihu.com` 请求中复制完整 Cookie。Cookie 属于敏感信息，请勿写入文档、代码仓库或 Issue。
 
-- [图标按钮](#😀-图标按钮)
-- [快捷键](#⌨-快捷键)
-- [配置项](#⚙-配置项)
+### 2. 阅读与搜索
 
----
+点击活动栏中的知乎图标，可查看推荐、热榜和收藏内容。登录后，“推荐”视图还会显示已发表文章和草稿箱。
 
-## 🔑 登录
+执行 `Zhihu: Search Items` 可以搜索知乎内容；列表未更新时可使用对应的刷新按钮或命令。
 
+### 3. 创作
 
-<a name = "login"></a>
+新建或打开 Markdown 文件，使用 VS Code 自带的 Markdown 预览检查排版。扩展支持：
 
-进入主页面，左侧最上方栏为个人中心，点击登录图标，或使用 `Ctrl + Shift + P` 打开命令面板，搜索并执行 `Zhihu: Login` 命令。
+- 块级公式：`$$ ... $$`
+- 行内公式：`$ ... $`
+- 带语言标识的代码块
+- Markdown 表格
+- Mermaid 图表（需要开启 `zhihu.enableMermaidToPng`）
 
-当前维护版推荐使用浏览器 Cookie 登录。插件会打开一个独立浏览器窗口，你只需要在该窗口中完成知乎登录，插件会自动读取该浏览器会话中的 Cookie 并写入 VS Code 扩展。
+### 4. 发布
 
-建议在浏览器窗口里使用账号密码登录知乎。知乎当前的验证码、短信、第三方登录链路经常触发风控，扩展内置密码/验证码登录暂不稳定，因此不再作为主要入口。
+在 Markdown 编辑器中执行 `Zhihu: Publish`。
 
-如果自动获取失败，插件会提示你从 `www.zhihu.com` 的请求头中复制完整 `Cookie`，粘贴后继续验证登录状态。至少需要包含 `z_c0`，通常还会包含 `_xsrf`、`d_c0` 等字段。
+要回答问题或更新已有内容，可将目标链接放在文档第一行：
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-28-08.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-登录成功后会有问候语，推荐栏会自动刷新出你的个性签名和头像：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-30-17.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-32-09.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-
-
----
-
-## 🎭 个性推荐
-
-登陆成功后，个性推荐板块会自动刷新，提供你的个性推荐内容：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-30-27.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-内容可能为答案，问题，或文章，点击条目，就会打开VSCode知乎页面：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-21-02-30.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-___
-
-## 🗂 已发表文章与草稿箱
-
-登录成功后，“推荐”视图下会显示“已发表文章”和“草稿箱”两个入口：
-
-- 已发表文章：展示当前账号已经发布的知乎文章，点击后可在 VS Code Webview 中查看。
-- 草稿箱：展示当前账号文章草稿，点击后可预览草稿内容。
-
-如果列表为空，请先确认已经登录，并点击刷新按钮重新加载。
-
----
-
-## 💥 热榜
-
-在左侧的中间位置，你会看到热榜栏，内部有六个分类，内容与知乎Web端、移动端同步，助你掌控实时资讯：
-
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-10-11-01-37.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
----
-
-## 🔎 搜索
-
-<a name = "search"></a>
-点击搜索按钮，或搜索命令 `Zhihu: Search Items`，搜索全站知乎内容：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/search.gif" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
----
-
-## 🖍 内容创作
-<a name = "write"></a>
-
-新建一个后缀名为`.md`的文件，若不需要数学公式，只需要按照你最熟悉的 Markdown 语法写即可，右键点击 `Zhihu: Preview` 可预览答案:
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/preview.gif" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-### Latex 语法支持
-
-为了更好地支持数学公式的写作，知乎定制的 Markdown 转换器提供了 Latex 语法拓展，语法示例：
-
-```
-$$
-  |\vec{A}|=\sqrt{A_x^2 + A_y^2 + A_z^2}.
-$$
-```
-
-用 `$$` 包围的部分会被当做 latex 语言进行解析，生成知乎的数学公式，比如上方的数学公式发布至知乎会生成如下公式:
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-22-42-21.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-行内 latex 也同样支持，语法举例：`$\sqrt6$`，一个dollar符号包裹公式即可。
-
-代码块：
-
-记得声明语言标签, 这样发布至知乎的答案才能获得正确的语法高亮，示例如下：
-
-    ```java
-    public class Apple {
-      public Apple() {}
-    }
-    ```
-
-发布后会提供 java 的语法高亮:
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-22-47-18.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-### 支持mermaid 转化为图片
-
-```json
-{
-    "zhihu.enableMermaidToPng": true, // 设置开启才能生效
-    "zhihu.mermaidTheme": "dark" // 支持设置 mermaid 图片主题，默认值是 "default"
-}
-```
-
-### 支持知乎表格
-直接在本地书写 markdown 表格即可，`row-style` 默认使用"striped"，行首，列首是灰色，隔行是灰色 。
-
-| 知乎表格 row-style | 效果|
-| --- | --- |
-| normal | 行首是灰色|
-| striped | 行首，列首是灰色，隔行是灰色 |
-## 📩 内容发布
-<a name = "publish"></a>
-
-### 链接扫描 😊
-
-若你想在特定的问题下回答，或想修改自己的某个原有回答，就将问题/答案链接以 `#! https://...` 的格式放置于答案的第一行，发布时，插件会自动扫描识别，发布至相应的问题下，或修改原有的答案。
-
-比如，你想在 [轻功是否真的存在，其在科学上可以解释吗？](https://www.zhihu.com/question/19602618) 该问题下回答问题, 只需将
-
-```
+```markdown
 #! https://www.zhihu.com/question/19602618
 ```
 
-若是你已经创作过的答案, 则将答案的链接, 形如:
-
-```
+```markdown
 #! https://www.zhihu.com/question/355223335/answer/1003461264
 ```
 
-的链接复制至文件顶部即可。
-
-若是你已经创作过的文章，则将文章的链接，形如：
-
-```
+```markdown
 #! https://zhuanlan.zhihu.com/p/107810342
 ```
 
-若插件没有在首行扫描到链接，则会询问创作者接下来的操作，你可以选择发布新文章，或从收藏夹中选取相应问题，发布至相应问题下：
+发布文章时，文档中的第一个一级标题会作为文章标题；标题之前的第一张图片可作为题图。没有首行链接时，扩展会提示选择发布方式。
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-47-45.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
+### 5. 上传图片
 
-### 发布文章
+扩展支持 `.gif`、`.png` 和 `.jpg` 图片，并会在当前 Markdown 光标位置插入上传后的链接：
 
-选择发布文章后，会继续提示你输入文章标题，输入完成后，按下回车，当前的文档就会以文章的形式发布至你的账号。
+- `Zhihu: Paste Image From Clipboard`：上传剪贴板图片。
+- `Zhihu: Upload Image From Path`：上传工作区中的图片。
+- `Zhihu: Upload Image From Explorer`：从文件选择器上传图片。
 
-#### 文章标题智能识别
+## 常用命令
 
-文章标题无需手动输入，插件会自动检测文本的第一个一级头标签：
+| 命令 | 作用 |
+| --- | --- |
+| `Zhihu: Login` | 登录知乎 |
+| `Zhihu: Logout` | 退出登录 |
+| `Zhihu: Refresh Feed` | 刷新推荐内容 |
+| `Zhihu: Refresh HotStories` | 刷新热榜 |
+| `Zhihu: Refresh Collection` | 刷新收藏夹 |
+| `Zhihu: Search Items` | 搜索知乎内容 |
+| `Zhihu: Publish` | 发布当前 Markdown 文档 |
+| `Zhihu: Clear Cache` | 清理扩展缓存 |
 
+图片上传的默认快捷键：
+
+| 操作 | Windows / Linux | macOS |
+| --- | --- | --- |
+| 剪贴板上传 | `Ctrl+Alt+P` | `Cmd+Alt+P` |
+| 路径上传 | `Ctrl+Alt+Q` | `Cmd+Alt+P` |
+| 文件选择器上传 | `Ctrl+Alt+F` | `Cmd+Alt+E` |
+
+> 当前 macOS 配置中，剪贴板上传和路径上传使用相同快捷键；如有冲突，可在 VS Code 的“键盘快捷方式”中重新绑定。
+
+## 配置
+
+| 配置项 | 默认值 | 作用 |
+| --- | --- | --- |
+| `zhihu.useVSTheme` | `true` | Webview 使用 VS Code 主题色 |
+| `zhihu.isTitleImageFullScreen` | `false` | 文章题图使用全尺寸显示 |
+| `zhihu.useWaterMark` | `false` | 启用水印 |
+| `zhihu.enableMermaidToPng` | `false` | 将 Mermaid 图表转换为图片后上传 |
+| `zhihu.mermaidTheme` | `default` | 设置 Mermaid 主题，例如 `dark` |
+
+## 本地开发
+
+环境要求：Node.js、npm 和 VS Code。
+
+```bash
+npm install --legacy-peer-deps
+npm run compile
+npm test
 ```
-# 这是一个标题（必须只是一个#）
+
+开发监听和生产构建：
+
+```bash
+npm run develop
+npm run vscode:prepublish
 ```
 
-然后将其作为标题，改行的内容也不会进入到正文中，如果没有检测到，还需用户手动输入。
+在 VS Code 中打开本仓库后，按 `F5` 启动 Extension Development Host 进行调试。
 
-#### 背景图片智能识别
+## 已知限制与反馈
 
-插件会自动扫描文本第一个一级头标签之前的内容，将第一个发现的图片链接作为背景图片：
+- 浏览器 Cookie 登录是当前推荐入口；扩展内置密码、验证码和第三方登录链路不作为稳定能力维护。
+- 知乎风控或接口变更可能导致登录、列表加载、图片上传或发布暂时不可用。
+- 报告问题时请附上 VS Code 版本、扩展版本、复现步骤和已脱敏的错误日志，切勿提交 Cookie。
 
-```
-![Image](https://pic4.zhimg.com/80/v2-157583e100e9e181191d285355332ebf.png)
+问题反馈：[GitHub Issues](https://github.com/mindandhand/VSCode-Zhihu/issues)
 
-# 标题在这, 上面的链接会变成背景图片, 不会进入正文
-```
+## 支持与赞赏
 
-### Html 支持
+如果这个扩展对你有帮助，可以通过[爱发电](https://ifdian.net/a/mindandhand)支持项目的长期维护。
 
-可以在正常的 Markdown 文本中插入 html 文本, 扩展了写作能力。
+赞赏完全自愿，不影响扩展功能、版本更新、技术支持或 Issue 处理。赞赏将用于接口适配、问题修复和版本发布。
 
->绝大多数 html 标签为非法标签，包括 table 在内，会被服务端过滤掉，只有 \<p\>, \<div>, \<img> 等合法标签才会被服务端存储，具体使用时小伙伴们可以自己尝试。
+## 相关链接与致谢
 
-### 从收藏夹中选取
+- [当前维护仓库](https://github.com/mindandhand/VSCode-Zhihu)
+- [版本更新记录](./CHANGELOG.md)
+- [支持说明](./SUPPORT.md)
+- [贡献指南](./CONTRIBUTING.md)
+- [原项目 niudai/VSCode-Zhihu](https://github.com/niudai/VSCode-Zhihu)
+- 原作者：[牛岱](https://www.zhihu.com/people/niu-dai-68-44)
 
->关于如何管理收藏夹，请移至 [收藏夹](#collect)。
-
-插件会提示选择你收藏过的问题：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-51-43.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-选择后，答案就会发布至相应的答案下（若已在该答案下发布过问题，请用顶部链接的方式来发布！)。
-
----
-
-## 🕐 定时发布
-
-所有的答案，文章发布时，均会多一次询问，用户须选择是稍后发布还是马上发布，如果选择稍后发布，需要输入发布的时间，比如 “5:30 pm”，"9:45 am" 等，目前仅支持当天的时间选择，输入后，你就会在个人中心的“安排”处看到你将发布的答案和发布的时间（需要手动点击刷新）：
-
-![](https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-16-11-20-14.png)
-
-定时发布采用 prelog 技术，中途关闭 VSCode，关机不影响定时发布，只需保证发布时间 VSCode 处于打开状态 && 知乎插件激活状态即可。
-
-时间到了之后，你会收到答案发布的通知，该事件也会从“安排”中移除。
-
-如果想取消发布，则点击 ❌ 按钮即可：
-
-![](https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-16-15-56-31.png)
-
->发布事件采用 md5 完整性校验，不允许用户同时预发两篇内容一摸一样的答案或文章。
----
-
-## 🎫 收藏夹
-<a name = "collect"></a>
-
-### ➕ 添加收藏
-
-不管是文章，答案，还是问题，在知乎页面顶栏的右侧，都会看到一个粉色的星状图标：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-56-42.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-### ➖ 查看收藏
-
-收藏的内容会在左侧下方显示，插件会自动分类：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-57-40.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-### ✖ 删除收藏
-
-鼠标移至相应的行，会出现叉状图标，点击即可删除：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-59-32.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
----
-
-## 📊 上传图片
-
-一篇优质的答案，离不开图片，知乎插件提供了三种非常便携的图片上传方式，支持上传 `.gif`, `.png`, `.jpg` 格式，且在图片上传的时候自动在当前 Markdown 光标所在行自动生成图片链接，无需创作者手动管理，Windows，MacOS，Linux 全平台支持。
-
-### 从粘贴板上传图片
-
-调用 `Zhihu: PasteImage` 命令，自动将系统粘贴板中的图片上传至知乎图床，并生成相应链接。
-
-快捷键为 `ctrl+alt+p`，也可以通过打开命令行面板搜索命令。
-
----
-
-### 工作区中右键上传
-
-在当前VSCode打开的文件夹内部，将鼠标放在你想上传的图片上，右键单击即可上传+生成链接：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-09-17-33-26.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-可以看到，可以将文件的路径复制至剪贴板，再调用 `Zhihu: PasteImageFromPath` 命令，插件会自动将该路径的文件上传至知乎图床，生成链接。
-
-### 打开文件浏览器选择图片
-
-在正在编辑的 Markdown 文档下右键，可以看到菜单项 `Zhihu: Upload Image From Explorer`，点击即可打开文件管理器，选择一张图片点击确定即可。
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-09-17-38-39.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
----
-
-## 😀 图标按钮
-
-<a name = "icons"></a>
-
-点击左侧活动栏的知乎按钮，进入知乎插件页面，在推荐的上方可以看到三个按钮，对应的命令分别为 `Zhihu: Login`（登录），`Zhihu: Refresh`（刷新）, `Zhihu: Search`（搜素）。
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-19-53-17.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-最右侧的更多栏点开，可以看到 `Zhihu: Logout` (注销) 命令按钮:
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-00-48.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-在 Markdown 页面内，可以在编辑窗口的右上角看到两个按钮：
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/niudai/ImageHost/master/zhihu/2020-02-08-20-02-37.png" style="box-shadow: 2px 2px 8px 0px #5dd8fd;border-radius: 6px;"/></p>
-
-左侧的为 `Zhihu: Publish`（发布答案），右侧的为 `Zhihu: Preview` (预览答案)。
-
-## ⌨ 快捷键
-
->表格中未涉及的命令没有默认快捷键，用户可以根据自己需要进行设置，注意快捷键的下按方式是先按住 ctrl+z，松开 ctrl，再按下一个按键。
-
-| 命令        | Windows           | Mac   |
-| :-------------: |:-------------:| :-----:|
-| Zhihu: Paste Image From Clipboard | ctrl+alt+p | cmd+alt+p |
-|Zhihu: Upload Image From Path     | ctrl+alt+q     |   cmd+alt+q
-| Zhihu: Upload Image From Explorer | ctrl+alt+f     |  cmd+alt+f
-
-## ⚙ 配置项
-
-
-| 配置        | 效果           |
-| :-------------: |:-------------:|
-| Zhihu: Use VSTheme  | 打勾开启知乎默认主题样式 |
-|Zhihu: Is Title Image Full Screen    | 打勾开让文章背景图片变成全屏    |
-| zhihu.enableMermaidToPng | 启动mermaid图片上传至知乎 |
-| zhihu.mermaidTheme | 设置mermaid的主题，`dark`和`default`  |
+感谢原作者和所有贡献者打下的基础。如果这个维护版对你有帮助，欢迎为当前仓库点一个 Star。

@@ -1,91 +1,61 @@
-# Contributing
+# 贡献指南
 
-👍🎉 First off, thanks for taking the time to contribute! 🎉👍
+感谢你愿意参与 Zhihu On VSCode Maintained 的维护。提交代码前，建议先通过 [Issue](https://github.com/mindandhand/VSCode-Zhihu/issues) 说明问题或方案，避免重复工作。
 
-When contributing to this project, please first discuss the changes you wish to make via an issue before making changes.
+## 准备环境
 
-## Your First Code Contribution
+需要安装 Git、Node.js、npm 和 VS Code。本项目依赖版本较旧；如果安装或构建失败，请在 Issue 中附上 Node.js 与 npm 版本。
 
-Unsure where to begin contributing? You can start a new issue to give a feedback of bugs you found, features you wanna implemented, etc.
-
-## Getting the code
-
-```
-git clone https://github.com/niudai/VSCode-Zhihu.git
+```bash
+git clone https://github.com/mindandhand/VSCode-Zhihu.git
+cd VSCode-Zhihu
+npm install --legacy-peer-deps
 ```
 
-Prerequisites
+项目包含部分旧版构建依赖，当前 npm 需要 `--legacy-peer-deps` 才能保留其既有 peer 关系。
 
-- [Git](https://git-scm.com/)
-- [NodeJS](https://nodejs.org/), `>= 10.0.0`
-- [npm](https://www.npmjs.com/), `>= 6.0.0`
+## 开发与调试
 
+启动 webpack 监听：
 
-## Dependencies
-
-From a terminal, where you have cloned the repository, execute the following command to install the required dependencies:
-
-```
-npm install
+```bash
+npm run develop
 ```
 
-## Build
+在 VS Code 中打开仓库，按 `F5` 启动 Extension Development Host。修改源代码后，先确认相关功能能在开发宿主中正常使用。
 
-run `npm install` first to install all deps and dev-deps.
+请不要通过直接修改 `node_modules` 修复问题；依赖兼容调整应记录在源码、构建配置或补丁文件中，确保其他贡献者能够复现。
 
-VSCode-Zhihu uses webpack as dev&prod tool. In order to build and run, you need to execute `npm run develop` first, which compiles the typescript code and bundles them together into a single big .js file in `\dist` folder, and since the webpack starts in **watch mode**, evertime you altered the source .ts file, webpack would recompile for you, so you don't have to compile it manually.
+## 提交前检查
 
-> You don't need to execute `npm run develop` any more, cuz the `Launch Extenison` task do it for you.
-
-You could check the scripts in `package.json` to see what `develop` do, knowing some webpack concepts would be helpful.
-
-Since webpack is always used as bundler and minimizer in client side, the npm dependencies in this project would sometimes break the behavior of thoses packages used for front-end, which you will see later.
-
-After the compiling phase, you could open the `debug` view in VSCode and run the `Launch Extension` to run it. If things goes right, a new VSCode windows would pop out.
-
-Open the Zhihu view and execute any command provided by Zhihu, you would see this error:
-
-```
-Activating extension 'niudai.vscode-zhihu' failed: Cannot find module '../lib/utils.js'.
+```bash
+npm run compile
+npm run lint
+npm test
+npm run vscode:prepublish
 ```
 
-This is where the tricky stuff comes in. 
+集成测试会启动 VS Code 测试宿主，首次运行可能需要下载对应版本。若测试宿主无法启动，请在 Pull Request 中说明环境和日志，但不要省略能够运行的编译、Lint 与生产构建检查。
 
-Here's the thing, the project use `pug` as its html template, and `pug` depends on `uglify-js` module, which you could find'em all in `/node_modules`. Things like pug, uglify-js are always used in server-side, in which people don't need to bundle them.
+## Marketplace 打包
 
-Webpack use syntaxes like `require()`, `import()` to recognize the dependency graph, but the code in `/node_modules/uglify-js/tools/node.js` just use the file I/O to read the file, making webpack misunderstand it. So to make the code run as it should, you should comment out this part of code in `/node_modules/uglify-js/tools/node.js`:
+当前默认分支为 `master`，README 使用了仓库内的相对图片和文档链接。使用 `vsce` 打包或发布时需要明确指定该分支：
 
-```js
-var FILES = UglifyJS.FILES = [
-    "../lib/utils.js",
-    "../lib/ast.js",
-    "../lib/parse.js",
-    "../lib/transform.js",
-    "../lib/scope.js",
-    "../lib/output.js",
-    "../lib/compress.js",
-    "../lib/sourcemap.js",
-    "../lib/mozilla-ast.js",
-    "../lib/propmangle.js",
-    "./exports.js",
-].map(function(file){
-    return require.resolve(file);
-});
-
-new Function("MOZ_SourceMap", "exports", FILES.map(function(file){
-    return fs.readFileSync(file, "utf8");
-}).join("\n\n"))(
-    require("source-map"),
-    UglifyJS
-);
-
-UglifyJS.AST_Node.warn_function = function(txt) {
-    console.error("WARN: %s", txt);
-};
+```bash
+npx @vscode/vsce package --githubBranch master
+npx @vscode/vsce publish --githubBranch master
 ```
 
-after you do this, re-run `npm run develop` and launch extension again, you would find everything works.
+发布命令会修改外部 Marketplace 状态，只应由获得 publisher 权限的维护者执行。
 
+## Pull Request
 
+- 一个 Pull Request 聚焦一个问题或功能。
+- 描述修改动机、实现方式和验证步骤。
+- 用户可见变化应同步更新 README 或 `CHANGELOG.md`。
+- 不要提交 Cookie、验证码、账号信息、日志中的鉴权字段或本地缓存文件。
+- 保留原项目的许可证和作者署名。
 
+## 报告问题
 
+问题报告所需信息和脱敏要求见 [SUPPORT.md](./SUPPORT.md)。
